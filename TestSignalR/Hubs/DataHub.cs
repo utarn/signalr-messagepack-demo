@@ -1,3 +1,5 @@
+using MessagePack;
+
 using Microsoft.AspNetCore.SignalR;
 
 using TestSignalR.Data;
@@ -23,8 +25,9 @@ public class DataHub : Hub
         // await Clients.All.SendAsync("ReceiveData", people);
     }
 
-    public async Task<AddPersonDto> AddPersonDto(AddPersonDto dto)
+    public async Task<AddPersonDto> AddPersonDto(byte[] bytes)
     {
+        var dto = MessagePackSerializer.Deserialize<AddPersonDto>(bytes);
         var person = new Person() { Name = dto.Name };
         await _context.People.AddAsync(person);
         await _context.SaveChangesAsync();
@@ -49,7 +52,9 @@ public class DataHub : Hub
     }
 }
 
+[MessagePackObject]
 public class AddPersonDto
 {
+    [Key("name")]
     public string Name { get; set; }
 }

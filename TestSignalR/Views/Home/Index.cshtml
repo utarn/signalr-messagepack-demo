@@ -5,17 +5,20 @@
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    
-    <input type="text" class="form-control" id="nameInput" />
+
+    <input type="text" class="form-control" id="nameInput"/>
     <button onclick="generatePerson()" class="btn btn-primary">Click me!</button>
 </div>
 
 @section Scripts
 {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft/signalr-protocol-msgpack/dist/browser/signalr-protocol-msgpack.min.js" asp-append-version="true"></script>
+    <script src="~/lib/msgpack/msgpack/dist.es5+umd/msgpack.min.js" asp-append-version="true"></script>
     <script>
         let nameInput = document.getElementById('nameInput');
         const connection = new signalR.HubConnectionBuilder()
+            .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
             .withUrl('/data')
             .withAutomaticReconnect({
                 nextRetryDelayInMilliseconds: retryContext => {
@@ -57,17 +60,12 @@
         start();
 
         async function generatePerson() {
-           // let personId = await connection.invoke("AddPerson", nameInput.value);
-           // console.log(personId);
-           // alert(personId);
-           
-           
-           let personObject = await connection.invoke("AddPersonDto", { name: nameInput.value });
+           let postData = { name: nameInput.value };
+           let encoded = MessagePack.encode(postData)
+           console.log(encoded);
+           let personObject = await connection.invoke("AddPersonDto", encoded);
            console.log(personObject);
-           // connection.invoke("AddPerson", nameInput.value).then((personId) => {
-           //    
-           //     });
-           
+          
         }
         
     </script>

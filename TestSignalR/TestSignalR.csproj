@@ -15,11 +15,14 @@
     
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="8.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="MessagePack" Version="2.5.140" />
+        <PackageReference Include="MessagePack.Annotations" Version="2.5.140" />
     </ItemGroup>
 
     <ItemGroup>

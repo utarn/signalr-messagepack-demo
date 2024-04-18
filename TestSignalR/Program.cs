@@ -1,3 +1,8 @@
+using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.Formatters.TestSignalR.Hubs;
+using MessagePack.Resolvers;
+
 using Microsoft.EntityFrameworkCore;
 
 using TestSignalR.Data;
@@ -5,9 +10,25 @@ using TestSignalR.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Generator tool
+// https://www.nuget.org/packages/MessagePack.Generator
+
+var formatter = new IMessagePackFormatter[]
+{
+    new AddPersonDtoFormatter()
+};  
+
+var resolver = CompositeResolver.Create(formatter, new[] { StandardResolver.Instance });
+var resolverOptions = MessagePackSerializerOptions.Standard
+    .WithResolver(resolver);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddMessagePackProtocol(options =>
+    {
+        options.SerializerOptions = resolverOptions;
+    });
 // Add sqlite dbcontext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection")));
