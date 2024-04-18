@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    
+    <input type="text" class="form-control" id="nameInput" />
+    <button onclick="generatePerson()" class="btn btn-primary">Click me!</button>
+</div>
+
+@section Scripts
+{
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script>
+        let nameInput = document.getElementById('nameInput');
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/data')
+            .withAutomaticReconnect({
+                nextRetryDelayInMilliseconds: retryContext => {
+                    if (retryContext.elapsedMilliseconds < 60000) {
+                        return Math.random() * 3000;
+                    } else {
+                        return 1000;
+                    }
+                }
+            })
+            .build();
+
+        async function start() {
+            try {
+                await connection.start();
+                if (Math.random() > 0.5) {
+                    await connection.invoke("RegisterGroup", connection.connectionId);
+                }
+            } catch (err) {
+                console.log(err);
+                setTimeout(start, 2000);
+            }
+        };
+        
+        connection.on("ReceiveMessage", (helloMessage) => {
+            console.log('Client has received from server');
+            console.log(helloMessage);
+        });
+        
+        connection.on("notification", (message) => {
+            console.log(message);
+        });
+        
+        connection.onclose(async () => {
+            await start();
+        });
+        
+        // Start the connection.
+        start();
+
+        async function generatePerson() {
+           // let personId = await connection.invoke("AddPerson", nameInput.value);
+           // console.log(personId);
+           // alert(personId);
+           
+           
+           let personObject = await connection.invoke("AddPersonDto", { name: nameInput.value });
+           console.log(personObject);
+           // connection.invoke("AddPerson", nameInput.value).then((personId) => {
+           //    
+           //     });
+           
+        }
+        
+    </script>
+
+
+}
